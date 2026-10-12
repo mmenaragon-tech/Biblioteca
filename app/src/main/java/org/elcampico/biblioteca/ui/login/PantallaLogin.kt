@@ -19,10 +19,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,6 +34,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -38,11 +43,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -61,10 +70,12 @@ private val Oscurecido = Brush.verticalGradient(
 @Composable
 fun PantallaLogin(
     onEntrar: (usuario: String, clave: String) -> Unit,
+    onIrRegistro: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var usuario by rememberSaveable { mutableStateOf("") }
     var clave by rememberSaveable { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
     Box(modifier = modifier.fillMaxSize()) {
         Image(
             painter = painterResource(R.drawable.fondo_login),
@@ -126,10 +137,27 @@ fun PantallaLogin(
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null)
                         },
-                        visualTransformation = PasswordVisualTransformation(),
+                        visualTransformation = if (passwordVisible) {
+                            VisualTransformation.None
+                        } else {
+                            PasswordVisualTransformation()
+                        },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Password
                         ),
+                        trailingIcon = {
+                            val image = if (passwordVisible) {
+                                Icons.Filled.Visibility
+                            } else {
+                                Icons.Filled.VisibilityOff
+                            }
+
+                            val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
+
+                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                                Icon(imageVector = image, contentDescription = description)
+                            }
+                        },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -150,7 +178,24 @@ fun PantallaLogin(
             TextButton(onClick = { /* … */ }) {
                 Text("¿Has olvidado la contraseña?", color = Color.White)
             }
+            Button(
+                onClick = onIrRegistro,
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF6D4C41),
+                    contentColor = Color.White,
+                    disabledContainerColor = Color(0xFF6D4C41).copy(alpha = 0.4f),
+                    disabledContentColor = Color.White.copy(alpha = 0.6f)
+                ),
+            ) {
+                Text(
+                    "Crear cuenta",
+                    fontFamily = Montserrat,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
+
     }
 
 }
@@ -159,7 +204,7 @@ fun PantallaLogin(
 @Composable
 private fun PantallaLoginPreview() {
     BibliotecaTheme {
-        PantallaLogin(onEntrar = { _, _ -> })
+        PantallaLogin(onEntrar = { _, _ -> }, onIrRegistro = {})
     }
 }
 
